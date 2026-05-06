@@ -14,7 +14,7 @@ import { Student } from '../types';
 const COLLECTION_NAME = 'students';
 
 export const studentService = {
-  async registerStudent(studentData: Omit<Student, 'id' | 'password' | 'rollNumber' | 'admissionDate'>) {
+  async registerStudent(studentData: Omit<Student, 'id' | 'password' | 'rollNumber' | 'admissionDate' | 'status'>) {
     try {
       const students = await this.getAllStudents();
       const rollNumber = "STD" + String(1001 + students.length);
@@ -33,6 +33,25 @@ export const studentService = {
       return { id: docRef.id, ...newStudent };
     } catch (error) {
       handleFirestoreError(error, OperationType.WRITE, COLLECTION_NAME);
+    }
+  },
+
+  async submitReport(reportData: Omit<Report, 'id'>) {
+    try {
+      const docRef = await addDoc(collection(db, 'reports'), reportData);
+      return { id: docRef.id, ...reportData };
+    } catch (error) {
+      handleFirestoreError(error, OperationType.WRITE, 'reports');
+    }
+  },
+
+  async getAllReports(): Promise<Report[]> {
+    try {
+      const querySnapshot = await getDocs(collection(db, 'reports'));
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Report));
+    } catch (error) {
+      handleFirestoreError(error, OperationType.GET, 'reports');
+      return [];
     }
   },
 

@@ -20,11 +20,15 @@ export default function Login({ type, onLogin, onRegister }: LoginProps) {
   const [fatherName, setFatherName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
+  const [zaat, setZaat] = useState('');
+  const [age, setAge] = useState('');
+  const [gmail, setGmail] = useState('');
+  const [reference, setReference] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isRegistering && onRegister) {
-      onRegister({ name, fatherName, phone, address });
+      onRegister({ name, fatherName, phone, address, zaat, age, gmail, reference });
     } else {
       onLogin({ rollNumber, password });
     }
@@ -74,16 +78,49 @@ export default function Login({ type, onLogin, onRegister }: LoginProps) {
                   required
                 />
               </div>
-              <div className="space-y-1">
-                <label className="text-xs font-black text-primary uppercase tracking-wider block">{t('phone')}</label>
-                <input
-                  type="text"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-4 py-3 bg-bg border-2 border-primary focus:border-accent outline-hidden font-bold rounded-none"
-                  required
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-black text-primary uppercase tracking-wider block">{t('phone')}</label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full px-4 py-3 bg-bg border-2 border-primary focus:border-accent outline-hidden font-bold rounded-none"
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-black text-primary uppercase tracking-wider block">Gmail</label>
+                  <input
+                    type="email"
+                    value={gmail}
+                    onChange={(e) => setGmail(e.target.value)}
+                    className="w-full px-4 py-3 bg-bg border-2 border-primary focus:border-accent outline-hidden font-bold rounded-none"
+                  />
+                </div>
               </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-black text-primary uppercase tracking-wider block">Zaat (Caste)</label>
+                  <input
+                    type="text"
+                    value={zaat}
+                    onChange={(e) => setZaat(e.target.value)}
+                    className="w-full px-4 py-3 bg-bg border-2 border-primary focus:border-accent outline-hidden font-bold rounded-none"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-black text-primary uppercase tracking-wider block">Age</label>
+                  <input
+                    type="number"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="w-full px-4 py-3 bg-bg border-2 border-primary focus:border-accent outline-hidden font-bold rounded-none"
+                  />
+                </div>
+              </div>
+
               <div className="space-y-1">
                 <label className="text-xs font-black text-primary uppercase tracking-wider block">{t('address')}</label>
                 <input
@@ -92,6 +129,16 @@ export default function Login({ type, onLogin, onRegister }: LoginProps) {
                   onChange={(e) => setAddress(e.target.value)}
                   className="w-full px-4 py-3 bg-bg border-2 border-primary focus:border-accent outline-hidden font-bold rounded-none"
                   required
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-black text-primary uppercase tracking-wider block">Reference</label>
+                <input
+                  type="text"
+                  value={reference}
+                  onChange={(e) => setReference(e.target.value)}
+                  className="w-full px-4 py-3 bg-bg border-2 border-primary focus:border-accent outline-hidden font-bold rounded-none"
                 />
               </div>
             </>

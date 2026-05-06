@@ -8,38 +8,46 @@ export interface User {
 }
 
 export interface Student {
-  id: string;
+  id?: string;
   name: string;
   fatherName: string;
   rollNumber: string;
   phone: string;
+  gmail?: string;
   address: string;
-  password?: string;
+  zaat?: string;
+  age?: string;
   admissionDate: string;
-  class?: string;
+  reference?: string;
+  password?: string;
+  status: 'Active' | 'Inactive';
 }
 
 export interface AttendanceRecord {
+  id?: string;
   studentId: string;
   date: string;
   status: 'present' | 'absent' | 'leave';
 }
 
 export interface Report {
-  id: string;
+  id?: string;
   studentId: string;
   date: string;
   sabaq: string;
+  sabqi: string;
+  manzil: string;
+  dua: string;
   namaz: string;
-  duas: string;
-  behavior: string;
+  behavioral: string;
 }
 
 export interface FinanceRecord {
-  id: string;
+  id?: string;
   type: 'income' | 'expense';
   amount: number;
   category: string;
+  donorName?: string;
   description: string;
   date: string;
 }

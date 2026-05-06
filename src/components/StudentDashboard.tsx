@@ -79,28 +79,49 @@ export default function StudentDashboard({ user, onLogout }: StudentDashboardPro
                   key={report.id}
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="p-6 bg-bg border border-primary/10 flex flex-wrap items-center justify-between gap-6 hover:border-accent transition-all relative group"
+                  className="bg-bg border-l-8 border-primary p-8 group relative overflow-hidden"
                 >
-                  <div className="flex items-center gap-6">
-                    <div className="w-16 h-16 bg-primary text-white flex flex-col items-center justify-center shadow-lg">
-                      <Calendar className="w-6 h-6" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 -rotate-45 translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
+                  
+                  <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-5 h-5 text-accent" />
+                      <span className="font-black text-primary tracking-widest">{report.date}</span>
                     </div>
-                    <div>
-                      <p className="font-black text-primary text-xl uppercase">{report.date}</p>
-                      <p className="text-accent font-bold text-lg">{report.sabaq}</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-8">
-                    <div className="text-center">
-                      <p className="text-xs text-primary/40 font-black uppercase tracking-widest mb-1">Namaz</p>
-                      <p className="text-2xl font-black text-primary">{report.namaz}</p>
-                    </div>
-                    <div className="text-center border-l-2 border-primary/10 pl-8">
-                      <p className="text-xs text-primary/40 font-black uppercase tracking-widest mb-1">Behavior</p>
-                      <p className="text-2xl font-black text-accent">{report.behavioral}</p>
+                    <div className="flex items-center gap-2 px-4 py-1 bg-primary text-white text-xs font-black uppercase tracking-tighter">
+                      <Star className="w-4 h-4 fill-current" />
+                      {report.behavioral}
                     </div>
                   </div>
-                  <div className="absolute inset-x-0 bottom-0 h-1 bg-accent transform scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black text-accent uppercase tracking-widest">Sabaq</p>
+                      <p className="font-bold text-primary group-hover:text-accent transition-colors">{report.sabaq}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black text-accent uppercase tracking-widest">Sabqi</p>
+                      <p className="font-bold text-primary">{report.sabqi || '-'}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black text-accent uppercase tracking-widest">Manzil</p>
+                      <p className="font-bold text-primary">{report.manzil || '-'}</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="text-[10px] font-black text-accent uppercase tracking-widest">Namaz</p>
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="w-4 h-4 text-accent" />
+                        <span className="font-black text-primary">{report.namaz}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {report.dua && (
+                    <div className="mt-6 pt-4 border-t border-primary/5">
+                      <p className="text-[10px] font-black text-accent uppercase tracking-widest mb-1">Duas/Additional</p>
+                      <p className="text-sm font-medium text-slate-600 italic">"{report.dua}"</p>
+                    </div>
+                  )}
                 </motion.div>
               ))}
             </div>

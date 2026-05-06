@@ -18,7 +18,6 @@ service cloud.firestore {
     // 2. Validation Blueprints
     function isValidStudent(data) {
       return data.keys().hasAll(['name', 'fatherName', 'phone', 'address', 'rollNumber', 'password', 'admissionDate', 'status'])
-        && data.keys().size() == 8
         && data.name is string && data.name.size() > 0 && data.name.size() <= 200
         && data.fatherName is string && data.fatherName.size() > 0 && data.fatherName.size() <= 200
         && data.phone is string && data.phone.size() >= 10 && data.phone.size() <= 20
@@ -31,22 +30,19 @@ service cloud.firestore {
 
     function isValidAttendance(data) {
       return data.keys().hasAll(['studentId', 'date', 'status'])
-        && data.keys().size() == 3
         && data.studentId is string && isValidId(data.studentId)
         && data.date is string
         && data.status in ['present', 'absent', 'leave'];
     }
 
     function isValidReport(data) {
-      return data.keys().hasAll(['studentId', 'date', 'sabaq', 'namaz', 'behavioral'])
-        && data.keys().size() == 5
+      return data.keys().hasAll(['studentId', 'date', 'sabaq', 'sabqi', 'manzil', 'dua', 'namaz', 'behavioral'])
         && data.studentId is string && isValidId(data.studentId)
         && data.date is string;
     }
 
     function isValidFinance(data) {
       return data.keys().hasAll(['type', 'amount', 'category', 'description', 'date'])
-        && data.keys().size() == 5
         && data.type in ['income', 'expense']
         && data.amount is number
         && data.date is string;

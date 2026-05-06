@@ -8,10 +8,14 @@
         "name": { "type": "string" },
         "fatherName": { "type": "string" },
         "phone": { "type": "string" },
+        "gmail": { "type": "string" },
         "address": { "type": "string" },
+        "zaat": { "type": "string" },
+        "age": { "type": "string" },
         "rollNumber": { "type": "string" },
         "password": { "type": "string" },
         "admissionDate": { "type": "string" },
+        "reference": { "type": "string" },
         "status": { "type": "string", "enum": ["Active", "Inactive"] }
       },
       "required": ["name", "fatherName", "phone", "rollNumber", "password"]
@@ -35,6 +39,9 @@
         "studentId": { "type": "string" },
         "date": { "type": "string" },
         "sabaq": { "type": "string" },
+        "sabqi": { "type": "string" },
+        "manzil": { "type": "string" },
+        "dua": { "type": "string" },
         "namaz": { "type": "string" },
         "behavioral": { "type": "string" }
       },
@@ -48,6 +55,7 @@
         "type": { "type": "string", "enum": ["income", "expense"] },
         "amount": { "type": "number" },
         "category": { "type": "string" },
+        "donorName": { "type": "string" },
         "description": { "type": "string" },
         "date": { "type": "string" }
       },
