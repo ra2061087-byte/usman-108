@@ -1,6 +1,9 @@
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useLanguage } from '../context/LanguageContext';
-import { Users, CalendarCheck, FileText, Wallet, LogOut, Search, Plus } from 'lucide-react';
+import { Users, CalendarCheck, FileText, Wallet, LogOut, Search, Plus, Trash2 } from 'lucide-react';
+import { studentService } from '../services/studentService';
+import { Student } from '../types';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -8,12 +11,38 @@ interface AdminDashboardProps {
 
 export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
   const { t } = useLanguage();
+  const [students, setStudents] = useState<Student[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  const fetchStudents = async () => {
+    setLoading(true);
+    const data = await studentService.getAllStudents();
+    setStudents(data);
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    fetchStudents();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    if (confirm('کیا آپ واقعی حذف کرنا چاہتے ہیں؟')) {
+      await studentService.deleteStudent(id);
+      fetchStudents();
+    }
+  };
+
+  const filteredStudents = students.filter(s => 
+    s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    s.rollNumber.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const menuItems = [
-    { title: t('manageStudents'), icon: Users, color: 'bg-blue-500', action: 'students', id: 'menu-students' },
-    { title: t('attendance'), icon: CalendarCheck, color: 'bg-emerald-500', action: 'attendance', id: 'menu-attendance' },
-    { title: t('reports'), icon: FileText, color: 'bg-amber-500', action: 'reports', id: 'menu-reports' },
-    { title: t('finance'), icon: Wallet, color: 'bg-rose-500', action: 'finance', id: 'menu-finance' }
+    { title: t('manageStudents'), icon: Users, color: 'bg-blue-600', action: 'students', id: 'menu-students' },
+    { title: t('attendance'), icon: CalendarCheck, color: 'bg-emerald-600', action: 'attendance', id: 'menu-attendance' },
+    { title: t('reports'), icon: FileText, color: 'bg-amber-600', action: 'reports', id: 'menu-reports' },
+    { title: t('finance'), icon: Wallet, color: 'bg-rose-600', action: 'finance', id: 'menu-finance' }
   ];
 
   return (
@@ -38,7 +67,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {menuItems.map((item, idx) => (
-          <motion.button
+          <motion.div
             key={item.id}
             id={item.id}
             initial={{ opacity: 0, y: 10 }}
@@ -52,7 +81,7 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             </div>
             <span className="text-xl font-black text-primary uppercase tracking-wider">{item.title}</span>
             <div className="absolute inset-0 border-2 border-transparent group-hover:border-accent/30 transition-colors pointer-events-none" />
-          </motion.button>
+          </motion.div>
         ))}
       </div>
 
@@ -65,13 +94,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
               <input 
                 type="text" 
                 placeholder="Search..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-12 pr-6 py-3 bg-bg border-2 border-primary focus:border-accent outline-hidden font-bold transition-all"
               />
             </div>
-            <button className="flex items-center gap-2 px-8 py-3 bg-accent text-white font-black shadow-lg hover:opacity-90 transition-all">
-              <Plus className="w-5 h-5" />
-              <span>Add New</span>
-            </button>
+            {/* Add New could be a toggle to show registration in a modal or same page, but for now we follow student register button */}
           </div>
         </div>
 
@@ -80,29 +108,36 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
             <thead className="bg-primary text-white">
               <tr>
                 <th className="p-5 font-black uppercase tracking-widest text-sm">Roll No</th>
-                <th className="p-5 font-black uppercase tracking-widest text-sm">Name</th>
-                <th className="p-5 font-black uppercase tracking-widest text-sm">Class</th>
-                <th className="p-5 font-black uppercase tracking-widest text-sm">Status</th>
+                <th className="p-5 font-black uppercase tracking-widest text-sm">Name / Father</th>
+                <th className="p-5 font-black uppercase tracking-widest text-sm">Phone</th>
+                <th className="p-5 font-black uppercase tracking-widest text-sm">Password</th>
                 <th className="p-5 font-black uppercase tracking-widest text-sm">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-primary/10">
-              {[
-                { roll: '101', name: 'Muhammad Ahmed', class: 'Grade 5', status: 'Active' },
-                { roll: '102', name: 'Ali Raza', class: 'Grade 3', status: 'Active' },
-                { roll: '103', name: 'Bilal Hussain', class: 'Grade 4', status: 'Inactive' }
-              ].map((row, i) => (
-                <tr key={i} className="hover:bg-bg transition-colors">
-                  <td className="p-5 font-black text-primary">{row.roll}</td>
-                  <td className="p-5 font-black text-slate-800 text-lg">{row.name}</td>
-                  <td className="p-5 font-bold text-accent">{row.class}</td>
+              {loading ? (
+                <tr><td colSpan={5} className="p-10 text-center font-bold text-primary">Loading...</td></tr>
+              ) : filteredStudents.length === 0 ? (
+                <tr><td colSpan={5} className="p-10 text-center font-bold text-primary">No students found</td></tr>
+              ) : filteredStudents.map((student) => (
+                <tr key={student.id} className="hover:bg-bg transition-colors">
+                  <td className="p-5 font-black text-primary">{student.rollNumber}</td>
                   <td className="p-5">
-                    <span className={`px-4 py-1 font-black text-xs uppercase tracking-tighter ${row.status === 'Active' ? 'bg-primary text-white' : 'bg-black/10 text-black/40'}`}>
-                      {row.status}
-                    </span>
+                    <p className="font-black text-slate-800 text-lg">{student.name}</p>
+                    <p className="text-accent text-sm font-bold">{student.fatherName}</p>
                   </td>
+                  <td className="p-5 font-bold text-primary">{student.phone}</td>
+                  <td className="p-5 font-mono text-xs">{student.password}</td>
                   <td className="p-5">
-                    <button className="text-accent font-black hover:underline cursor-pointer">Edit</button>
+                    <div className="flex gap-4">
+                      <button className="text-accent font-black hover:underline cursor-pointer">Edit</button>
+                      <button 
+                        onClick={() => handleDelete(student.id!)}
+                        className="text-rose-600 hover:text-rose-800"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

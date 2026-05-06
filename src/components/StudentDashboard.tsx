@@ -1,7 +1,9 @@
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 import { useLanguage } from '../context/LanguageContext';
 import { User, FileText, Calendar, BookOpen, LogOut, Star } from 'lucide-react';
 import { User as UserType } from '../types';
+import { studentService } from '../services/studentService';
 
 interface StudentDashboardProps {
   user: UserType;
@@ -10,8 +12,21 @@ interface StudentDashboardProps {
 
 export default function StudentDashboard({ user, onLogout }: StudentDashboardProps) {
   const { t } = useLanguage();
+  const [reports, setReports] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const reports = [
+  useEffect(() => {
+    const fetchReports = async () => {
+      if (user.id) {
+        const data = await studentService.getReports(user.id);
+        setReports(data);
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, [user.id]);
+
+  const displayReports = reports.length > 0 ? reports : [
     { date: '2024-05-01', sabaq: 'Surah Al-Mulk (5 Verses)', namaz: '5/5', behavioral: 'Excellent', id: 'rep-1' },
     { date: '2024-04-30', sabaq: 'Surah Al-Mulk (10 Verses)', namaz: '4/5', behavioral: 'Good', id: 'rep-2' },
   ];
@@ -57,7 +72,9 @@ export default function StudentDashboard({ user, onLogout }: StudentDashboardPro
             </div>
 
             <div className="space-y-6">
-              {reports.map((report) => (
+              {loading && reports.length === 0 ? (
+                <p className="text-center font-bold text-primary">Loading reports...</p>
+              ) : displayReports.map((report) => (
                 <motion.div 
                   key={report.id}
                   initial={{ opacity: 0, x: -10 }}

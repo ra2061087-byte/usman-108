@@ -1,0 +1,65 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Since we don't have a formal admin auth yet, we'll allow standard operations
+    // based on a placeholder. In a real app, we'd check request.auth.uid against an admins collection.
+    // For now, we'll allow public creation for registration and public list for login check.
+    
+    function isValidStudent(data) {
+      return data.keys().hasAll(['name', 'fatherName', 'phone', 'address', 'rollNumber', 'password', 'admissionDate'])
+        && data.keys().size() == 8
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.fatherName is string && data.fatherName.size() > 0 && data.fatherName.size() <= 100
+        && data.phone is string && data.phone.size() >= 10 && data.phone.size() <= 20
+        && data.address is string && data.address.size() <= 500
+        && data.rollNumber is string && data.rollNumber.size() <= 50
+        && data.password is string && data.password.size() >= 4
+        && data.admissionDate is string;
+    }
+
+    match /students/{studentId} {
+      allow create: if isValidId(studentId) && isValidStudent(incoming());
+      // For login, we need to allow listing to find the student by credentials.
+      // We should ideally restrict this, but without formal Auth we have to allow some listing.
+      allow list: if true; 
+      allow get: if true;
+      allow delete: if false; // Only admin (but we haven't defined admin check yet properly)
+    }
+
+    match /attendance/{attendanceId} {
+      allow read: if true;
+      allow create: if isValidId(attendanceId) && incoming().keys().hasAll(['studentId', 'date', 'status']);
+    }
+
+    match /reports/{reportId} {
+      allow read: if true;
+      allow create: if isValidId(reportId) && incoming().keys().hasAll(['studentId', 'date', 'sabaq', 'namaz', 'behavioral']);
+    }
+
+    match /finance/{financeId} {
+      allow read: if true;
+      allow create: if isValidId(financeId) && incoming().keys().hasAll(['type', 'amount', 'date']);
+    }
+  }
+}

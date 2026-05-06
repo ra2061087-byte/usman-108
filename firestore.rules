@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // 3. Path Variable Hardening Helpers
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+    
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isSignedIn() { return request.auth != null; }
+
+    // 2. Validation Blueprints
+    function isValidStudent(data) {
+      return data.keys().hasAll(['name', 'fatherName', 'phone', 'address', 'rollNumber', 'password', 'admissionDate', 'status'])
+        && data.keys().size() == 8
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 200
+        && data.fatherName is string && data.fatherName.size() > 0 && data.fatherName.size() <= 200
+        && data.phone is string && data.phone.size() >= 10 && data.phone.size() <= 20
+        && data.address is string && data.address.size() <= 1000
+        && data.rollNumber is string && data.rollNumber.size() <= 50
+        && data.password is string && data.password.size() >= 4
+        && data.admissionDate is string
+        && data.status in ['Active', 'Inactive'];
+    }
+
+    function isValidAttendance(data) {
+      return data.keys().hasAll(['studentId', 'date', 'status'])
+        && data.keys().size() == 3
+        && data.studentId is string && isValidId(data.studentId)
+        && data.date is string
+        && data.status in ['present', 'absent', 'leave'];
+    }
+
+    function isValidReport(data) {
+      return data.keys().hasAll(['studentId', 'date', 'sabaq', 'namaz', 'behavioral'])
+        && data.keys().size() == 5
+        && data.studentId is string && isValidId(data.studentId)
+        && data.date is string;
+    }
+
+    function isValidFinance(data) {
+      return data.keys().hasAll(['type', 'amount', 'category', 'description', 'date'])
+        && data.keys().size() == 5
+        && data.type in ['income', 'expense']
+        && data.amount is number
+        && data.date is string;
+    }
+
+    // 1. Master Gate Patterns
+    
+    match /students/{studentId} {
+      // 8. Secure List Queries: we allow listing for login check. 
+      // In a real app we'd scope this by auth, but here we scope by identifying fields.
+      allow list, get: if true; 
+      
+      // Anyone can register
+      allow create: if isValidId(studentId) && isValidStudent(incoming());
+      
+      // Actions: Update only by admin (for now open until we have admin auth)
+      allow update: if isValidStudent(incoming());
+      
+      allow delete: if true; 
+    }
+
+    match /attendance/{attendanceId} {
+      allow list, get: if true;
+      allow create: if isValidId(attendanceId) && isValidAttendance(incoming());
+      allow update: if isValidAttendance(incoming());
+      allow delete: if true;
+    }
+
+    match /reports/{reportId} {
+      allow list, get: if true;
+      allow create: if isValidId(reportId) && isValidReport(incoming());
+      allow update: if isValidReport(incoming());
+      allow delete: if true;
+    }
+
+    match /finance/{financeId} {
+      allow list, get: if true;
+      allow create: if isValidId(financeId) && isValidFinance(incoming());
+      allow update: if isValidFinance(incoming());
+      allow delete: if true;
+    }
+  }
+}

@@ -12,6 +12,7 @@ import AdminDashboard from './components/AdminDashboard';
 import StudentDashboard from './components/StudentDashboard';
 import { User } from './types';
 import { motion, AnimatePresence } from 'motion/react';
+import { studentService } from './services/studentService';
 
 function LandingPage() {
   const { t } = useLanguage();
@@ -46,14 +47,54 @@ function MainApp() {
   const { t } = useLanguage();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [activeLogin, setActiveLogin] = useState<'student' | 'admin' | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = (data: { rollNumber?: string; password?: string }) => {
-    if (activeLogin === 'admin') {
-      setCurrentUser({ role: 'admin', name: 'Administrator' });
-    } else {
-      setCurrentUser({ role: 'student', rollNumber: data.rollNumber || 'NEW', name: 'Student' });
+  const handleLogin = async (data: { rollNumber?: string; password?: string }) => {
+    setIsLoading(true);
+    try {
+      if (activeLogin === 'admin') {
+        if (data.rollNumber === 'admin' && data.password === 'Usman@109') {
+          setCurrentUser({ role: 'admin', name: 'Administrator' });
+          setActiveLogin(null);
+        } else {
+          alert('غلط یوزر نیم یا پاس ورڈ!');
+        }
+      } else if (data.rollNumber && data.password) {
+        const student = await studentService.login(data.rollNumber, data.password);
+        if (student) {
+          setCurrentUser({ 
+            role: 'student', 
+            id: student.id,
+            rollNumber: student.rollNumber, 
+            name: student.name 
+          });
+          setActiveLogin(null);
+        } else {
+          alert('غلط یوزر نیم یا پاس ورڈ!');
+        }
+      }
+    } catch (error) {
+      console.error(error);
+      alert('کنکشن کا مسئلہ');
+    } finally {
+      setIsLoading(false);
     }
-    setActiveLogin(null);
+  };
+
+  const handleRegister = async (studentData: any) => {
+    setIsLoading(true);
+    try {
+      const result = await studentService.registerStudent(studentData);
+      if (result) {
+        alert(`رجسٹریشن کامیاب!\nرول نمبر: ${result.rollNumber}\nپاس ورڈ: ${result.password}\n\nیہ طالب علم کو بتائیں۔`);
+        setActiveLogin(null);
+      }
+    } catch (error) {
+      console.error(error);
+      alert('رجسٹریشن میں مسئلہ');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
@@ -69,6 +110,12 @@ function MainApp() {
     <div className="min-h-screen bg-bg flex flex-col relative">
       <div className="absolute inset-0 pattern-bg opacity-5 pointer-events-none" />
       
+      {isLoading && (
+        <div className="fixed inset-0 bg-white/50 backdrop-blur-sm z-[100] flex items-center justify-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-accent rounded-full animate-spin" />
+        </div>
+      )}
+
       {!currentUser && (
         <>
           <Header />
@@ -89,6 +136,7 @@ function MainApp() {
               key="login"
               type={activeLogin} 
               onLogin={handleLogin} 
+              onRegister={handleRegister}
             />
           )}
 
